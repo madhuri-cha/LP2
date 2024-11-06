@@ -1,0 +1,109 @@
+Step 1: Create the DLL in C++
+Open a C++ development environment like Visual Studio.
+
+Create a new project:
+
+Select "Dynamic Link Library" as the project type.
+Name it, e.g., MathLibrary.
+Add the code for mathematical operations in the DLL:
+
+Create a header file MathLibrary.h and a source file MathLibrary.cpp.
+Code for MathLibrary.h
+cpp
+Copy code
+#ifndef MATHLIBRARY_H
+#define MATHLIBRARY_H
+
+#ifdef MATHLIBRARY_EXPORTS
+#define MATHLIBRARY_API __declspec(dllexport)
+#else
+#define MATHLIBRARY_API __declspec(dllimport)
+#endif
+
+extern "C" {
+    MATHLIBRARY_API int add(int a, int b);
+    MATHLIBRARY_API int subtract(int a, int b);
+    MATHLIBRARY_API double sine(double angle);
+    MATHLIBRARY_API double cosine(double angle);
+    MATHLIBRARY_API int stringLength(const char* str);
+}
+
+#endif
+Code for MathLibrary.cpp
+cpp
+Copy code
+#include "MathLibrary.h"
+#include <cmath>
+#include <cstring>
+
+extern "C" {
+
+    MATHLIBRARY_API int add(int a, int b) {
+        return a + b;
+    }
+
+    MATHLIBRARY_API int subtract(int a, int b) {
+        return a - b;
+    }
+
+    MATHLIBRARY_API double sine(double angle) {
+        return sin(angle);
+    }
+
+    MATHLIBRARY_API double cosine(double angle) {
+        return cos(angle);
+    }
+
+    MATHLIBRARY_API int stringLength(const char* str) {
+        return strlen(str);
+    }
+}
+Compile the project to produce the DLL file (MathLibrary.dll).
+Step 2: Set up JNI in Java to Load the DLL
+Create a new Java project and class named MathLibraryInterface to interact with the DLL.
+Define native methods corresponding to the functions in the DLL.
+Code for MathLibraryInterface.java
+java
+Copy code
+public class MathLibraryInterface {
+    static {
+        System.loadLibrary("MathLibrary"); // Load the DLL
+    }
+
+    // Declare native methods
+    public native int add(int a, int b);
+    public native int subtract(int a, int b);
+    public native double sine(double angle);
+    public native double cosine(double angle);
+    public native int stringLength(String str);
+
+    public static void main(String[] args) {
+        MathLibraryInterface mathLib = new MathLibraryInterface();
+
+        // Test arithmetic operations
+        System.out.println("Add: " + mathLib.add(5, 3));
+        System.out.println("Subtract: " + mathLib.subtract(5, 3));
+
+        // Test trigonometric operations
+        System.out.println("Sine of 30 degrees: " + mathLib.sine(Math.toRadians(30)));
+        System.out.println("Cosine of 30 degrees: " + mathLib.cosine(Math.toRadians(30)));
+
+        // Test string operation
+        System.out.println("String Length of 'Hello': " + mathLib.stringLength("Hello"));
+    }
+}
+Compile the Java file to generate MathLibraryInterface.class.
+Step 3: Generate JNI Header File for C++
+Open a terminal or command prompt in the directory with the Java class file.
+
+Use the javac command to compile the Java file if not already compiled:
+
+shell
+Copy code
+javac MathLibraryInterface.java
+Generate the header file using javah (or javac -h in newer JDK versions):
+
+shell
+Copy code
+javac -h . MathLibraryInterface
+This command creates a header file named MathLibraryInterface.h containing JNI function declarations
